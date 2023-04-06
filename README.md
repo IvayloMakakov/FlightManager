@@ -1,2 +1,1 @@
-# FlightManager
-App managing flights
+# FlightManagerProject

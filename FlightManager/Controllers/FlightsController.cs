@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FlightManager.Data;
 using FlightManager.Models;
+using FlightManager.Addings;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace FlightManager.Controllers
 {
@@ -20,10 +23,30 @@ namespace FlightManager.Controllers
         }
 
         // GET: Flights
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Flights.ToListAsync());
-        }
+        public async Task<IActionResult> Index(string fromSearch, string toSearch, int? pageNumber)
+		{
+			if (fromSearch != null || toSearch != null)
+			{
+				pageNumber = 1;
+			}
+
+			ViewData["FromSearch"] = fromSearch;
+			ViewData["ToSearch"] = toSearch;
+
+			var flights = from f in _context.Flights
+						  select f;
+			if (!String.IsNullOrEmpty(fromSearch))
+			{
+				flights = flights.Where(f => f.LocationFrom.Contains(fromSearch));
+			}
+			if (!String.IsNullOrEmpty(toSearch))
+			{
+				flights = flights.Where(f => f.LocationTo.Contains(toSearch));
+			}
+
+			int pageSize = 3;
+			return View(await PaginatedList<Flight>.CreateAsync(flights, pageNumber ?? 1, pageSize));
+		}
 
         // GET: Flights/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -34,17 +57,19 @@ namespace FlightManager.Controllers
             }
 
             var flight = await _context.Flights
+                .Include(r=>r.Reservations)
+                .ThenInclude(p=>p.Passengers)
                 .FirstOrDefaultAsync(m => m.FlightId == id);
             if (flight == null)
             {
                 return NotFound();
             }
-
-            return View(flight);
+			return View(flight);
         }
 
-        // GET: Flights/Create
-        public IActionResult Create()
+		// GET: Flights/Create
+		[Authorize(Roles = "Admin")]
+		public IActionResult Create()
         {
             return View();
         }
@@ -54,7 +79,8 @@ namespace FlightManager.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FlightId,LocationFrom,LocationTo,PlaneTakingOff,PlaneLanding,PlaneType,PlaneUniqueNumber,PilotName,PassengerCapacity,BusinessCapacity")] Flight flight)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Create([Bind("FlightId,LocationFrom,LocationTo,PlaneTakingOff,PlaneLanding,PlaneType,PlaneUniqueNumber,PilotName,PassengerCapacity,BusinessCapacity")] Flight flight)
         {
             if (ModelState.IsValid)
             {
@@ -65,8 +91,9 @@ namespace FlightManager.Controllers
             return View(flight);
         }
 
-        // GET: Flights/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+		// GET: Flights/Edit/5
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -86,7 +113,8 @@ namespace FlightManager.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("FlightId,LocationFrom,LocationTo,PlaneTakingOff,PlaneLanding,PlaneType,PlaneUniqueNumber,PilotName,PassengerCapacity,BusinessCapacity")] Flight flight)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Edit(int id, [Bind("FlightId,LocationFrom,LocationTo,PlaneTakingOff,PlaneLanding,PlaneType,PlaneUniqueNumber,PilotName,PassengerCapacity,BusinessCapacity")] Flight flight)
         {
             if (id != flight.FlightId)
             {
@@ -116,8 +144,9 @@ namespace FlightManager.Controllers
             return View(flight);
         }
 
-        // GET: Flights/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+		// GET: Flights/Delete/5
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -137,7 +166,8 @@ namespace FlightManager.Controllers
         // POST: Flights/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var flight = await _context.Flights.FindAsync(id);
             _context.Flights.Remove(flight);

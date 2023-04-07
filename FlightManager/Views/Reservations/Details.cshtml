@@ -28,6 +28,21 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Flight.FlightId)
         </dd>
+        <dt class="col-sm-2">
+            Passangers
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Passengers)
+            <hr class="mb-0" />
+            <div>
+                <ul class="list-group list-group-flush ">
+                    @foreach (var (passenger, index) in Model.Passengers.Select((value, i) => (value, i)))
+                    {
+                        <li class="list-group-item">@(index + 1).  <strong>@passenger.Passanger.EGN</strong> @passenger.Passanger.FirstName @passenger.Passanger.MiddleName @passenger.Passanger.LastName </li>
+                    }
+                </ul>
+            </div>
+        </dd>
     </dl>
 </div>
 <div>

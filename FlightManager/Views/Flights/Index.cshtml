@@ -1,4 +1,10 @@
-﻿@model IEnumerable<FlightManager.Models.Flight>
+﻿@using FlightManager.Addings;
+@using Microsoft.AspNetCore.Identity;
+@model PaginatedList<Flight>
+
+@inject Microsoft.AspNetCore.Identity.SignInManager<User> SignInManager;
+@inject Microsoft.AspNetCore.Identity.UserManager<User> UserManager
+
 
 @{
     ViewData["Title"] = "Index";
@@ -6,38 +12,54 @@
 
 <h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
+
+<form asp-action="Index" method="get" class="form-inline">
+    <div class="form-actions no-color">
+        <p>
+            Search by destination to: <input type="text" name="ToSearch" value="@ViewData["ToSearch"]" class="form-control w-25" />
+            From: <input type="text" name="FromSearch" value="@ViewData["FromSearch"]" class="form-control w-25" />
+            <input type="submit" value="Search..." class="btn btn-primary" />
+            <a asp-action="Index">Clear</a>
+        </p>
+    </div>
+</form>
+
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.LocationFrom)
+               LocationFrom
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LocationTo)
+                LocationTo
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PlaneTakingOff)
+                PlaneTakingOff
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PlaneLanding)
+                PlaneLanding
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PlaneType)
+                PlaneType
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PlaneUniqueNumber)
+                PlaneUniqueNumber
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PilotName)
+                PilotName
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PassengerCapacity)
+                PassengerCapacity
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.BusinessCapacity)
+                BusinessCapacity
             </th>
             <th></th>
         </tr>
@@ -73,11 +95,34 @@
                 @Html.DisplayFor(modelItem => item.BusinessCapacity)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.FlightId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.FlightId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.FlightId">Delete</a>
-            </td>
+                    @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin")) {
+                        <a asp-action="Edit" asp-route-id="@item.FlightId">Edit</a>
+                    @("|")
+                    < a asp - action = "Delete" asp - route - id = "@item.FlightId" > Delete </ a >
+                    }
+                </td>
         </tr>
 }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @prevDisabled">
+    Back
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>

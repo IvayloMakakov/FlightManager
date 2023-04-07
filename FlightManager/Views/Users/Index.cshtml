@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FlightManager.Models.User>
+﻿@model FlightManager.Addings.PaginatedList<User>;
 
 @{
     ViewData["Title"] = "Index";
@@ -9,29 +9,42 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<form asp-action="Index" method="get" class="form-inline">
+    <div class="form-actions no-color">
+        <p>
+            Search by email: <input type="text" name="EmailSearch" value="@ViewData["EmailSearch"]" class="form-control w-25" />
+            FirstName: <input type="text" name="FirstNameSearch" value="@ViewData["FirstNameSearch"]" class="form-control w-25" />
+            LastName: <input type="text" name="LastNameSearch" value="@ViewData["LastNameSearch"]" class="form-control w-25" />
+            <input type="submit" value="Search..." class="btn btn-primary" />
+            <a asp-action="Index">Clear</a>
+        </p>
+    </div>
+</form>
+
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Password)
+                @Html.DisplayNameFor(model => model.First().UserId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Email)
+                @Html.DisplayNameFor(model => model.First().Email)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.FirstName)
+                FirstName
+            <th>
+                LastName
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastName)
+                EGN
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EGN)
+                Address
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
+                PhoneNumber
             </th>
             <th></th>
         </tr>
@@ -69,3 +82,22 @@
 }
     </tbody>
 </table>
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @prevDisabled">
+    Предишна
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @nextDisabled">
+    Следваща
+</a>

@@ -1,4 +1,6 @@
 ﻿@model FlightManager.Models.Flight
+@inject Microsoft.AspNetCore.Identity.UserManager<User> UserManager
+@inject Microsoft.AspNetCore.Identity.SignInManager<User> SignInManager
 
 @{
     ViewData["Title"] = "Details";
@@ -64,6 +66,25 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.BusinessCapacity)
         </dd>
+        @if (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Employee")))
+        {
+            <dt class="col-sm-2">
+                Reservations
+            </dt>
+            <dd class="col-sm-10">
+                <hr class="mb-0" />
+                <div>
+                    <ul class="list-group list-group-flush ">
+                        @foreach (var (reservation, index) in Model.Reservations.Select((value, i) => (value, i)))
+                        {
+                            <li class="list-group-item">@(index + 1). 
+                                <a asp-action="Details" asp-controller="Reservations" asp-route-id="@reservation.ReservationId">@reservation.Email</a>, 
+                                confirmed: @reservation.IsConfirmed, passengers: @reservation.Passengers.Count()</li>
+                        }
+                    </ul>
+                </div>
+            </dd>
+        }
     </dl>
 </div>
 <div>

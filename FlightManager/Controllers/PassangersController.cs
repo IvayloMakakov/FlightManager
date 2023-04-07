@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FlightManager.Data;
 using FlightManager.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace FlightManager.Controllers
 {
@@ -16,17 +18,19 @@ namespace FlightManager.Controllers
 
         public PassangersController(ApplicationDbContext context)
         {
-            _context = context;
+			_context = context;
         }
 
-        // GET: Passangers
-        public async Task<IActionResult> Index()
+		// GET: Passangers
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Index()
         {
             return View(await _context.Passengers.ToListAsync());
         }
 
-        // GET: Passangers/Details/5
-        public async Task<IActionResult> Details(int? id)
+		// GET: Passangers/Details/5
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -43,8 +47,9 @@ namespace FlightManager.Controllers
             return View(passanger);
         }
 
-        // GET: Passangers/Create
-        public IActionResult Create()
+		// GET: Passangers/Create
+		[Authorize(Roles = "Admin")]
+		public IActionResult Create()
         {
             return View();
         }
@@ -54,7 +59,9 @@ namespace FlightManager.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PassangerId,FirstName,MiddleName,LastName,EGN,PhoneNumber,Nationality")] Passanger passanger)
+      
+        [Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Create([Bind("PassangerId,FirstName,MiddleName,LastName,EGN,PhoneNumber,Nationality")] Passanger passanger)
         {
             if (ModelState.IsValid)
             {
@@ -65,8 +72,9 @@ namespace FlightManager.Controllers
             return View(passanger);
         }
 
-        // GET: Passangers/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+		// GET: Passangers/Edit/5
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -86,7 +94,8 @@ namespace FlightManager.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PassangerId,FirstName,MiddleName,LastName,EGN,PhoneNumber,Nationality")] Passanger passanger)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Edit(int id, [Bind("PassangerId,FirstName,MiddleName,LastName,EGN,PhoneNumber,Nationality")] Passanger passanger)
         {
             if (id != passanger.PassangerId)
             {
@@ -116,8 +125,9 @@ namespace FlightManager.Controllers
             return View(passanger);
         }
 
-        // GET: Passangers/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+		// GET: Passangers/Delete/5
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -137,7 +147,8 @@ namespace FlightManager.Controllers
         // POST: Passangers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var passanger = await _context.Passengers.FindAsync(id);
             _context.Passengers.Remove(passanger);
